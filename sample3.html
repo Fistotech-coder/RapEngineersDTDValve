@@ -1,0 +1,3250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diverter Valve</title>
+
+  <!-- CSS -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 200vh;
+      font-family: 'Open Sans', sans-serif;
+      background-color: white;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      transition: background-color 1s ease;
+    }
+
+    body.gray-bg {
+      background-color: #D6D6D6;
+    }
+
+    .top-left-logo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 100px;
+      z-index: 99999999;
+    }
+
+    .container {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      z-index: 1;
+      overflow: hidden;
+      transition: background-color 1s ease;
+    }
+
+    .bg-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      transition: opacity 1s ease;
+    }
+
+    .bullseye-mask {
+      position: absolute;
+      width: 350vmin;
+      height: 350vmin;
+      background-color: white;
+      -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 30%, black 30.1%);
+      mask-image: radial-gradient(circle at center, transparent 0%, transparent 30%, black 30.1%);
+      z-index: 1;
+      transition: transform 2s ease, opacity 1s ease;
+      transform-origin: center;
+      opacity: 1;
+    }
+
+    .bullseye-mask.zoom-out {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+
+    .first-circle {
+      width: 90vmin;
+      height: 90vmin;
+      border-radius: 50%;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      z-index: 3;
+      transition: transform 1s ease, box-shadow 0.5s ease, background-color 1s ease;
+      transform-origin: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .first-circle.zoom-out {
+      transform: translate(-50%, -50%) scale(2.5);
+      background-color: #D6D6D6;
+      box-shadow: none;
+    }
+
+    .circle-content {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .text {
+      font-size: 5rem;
+      font-weight: 800;
+      font-family: "Open Sans";
+      line-height: 1.1;
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    .text:first-child {
+      top: 35%;
+      left: 3%;
+      color: #D20809;
+    }
+
+    .text:last-child {
+      bottom: 35%;
+      left: 55%;
+      color: #1877F2;
+      z-index: -9;
+    }
+
+    .zoom-out .text:first-child {
+      top: 40%;
+      left: 8%;
+      color: #D20809;
+      font-size: 4vw;
+      z-index: 99;
+    }
+
+    .zoom-out .text:last-child {
+      bottom: 35%;
+      left: 50%;
+      color: #1877F2;
+      z-index: -9;
+    }
+
+    .center-image {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      transition: width 1s ease;
+    }
+
+    .center-image.fade-out {
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .text.scroll-to-top {
+      transform: translateY(-100%);
+      transition: transform 1s ease;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    .first-circle.zoom-out .center-image {
+      width: 55%;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      padding: 10px 20px;
+      justify-content: flex-end;
+      align-items: center;
+      z-index: 9999999999;
+      gap: 1vw;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .navbar.visible {
+      display: flex;
+      opacity: 1;
+    }
+
+    .dropdown {
+      padding: 5px 10px;
+      font-size: 1vw;
+      font-weight: 600;
+      border: 1px solid #A1A1A1;
+      border-radius: 1vw;
+      background-color: transparent;
+      color: #E91F20;
+    }
+
+    .social-icons {
+      border: 1px solid #A1A1A1;
+      border-radius: 1.5vw;
+    }
+
+    .social-icons i {
+      font-size: 20px;
+      margin: .2vw;
+      padding: 8px;
+      border: 1px solid #A1A1A1;
+      border-radius: 50%;
+      background-color: #FFFFFF;
+      color: #343455;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .social-icons i:hover {
+      transform: scale(1.1);
+    }
+
+    .valve-letter {
+      position: relative;
+      display: inline-block;
+    }
+
+    .valve-letter::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 80%;
+      width: 1vw;
+      height: 0vh;
+      background-color: #1877F2;
+      transition: height 1s ease;
+    }
+
+    .valve-letter.draw-line::after {
+      height: 100vh;
+    }
+
+    .text.center-valve-text {
+      top: 50%;
+      left: 60% !important;
+      bottom: auto;
+      transform: translate(-50%, -50%);
+      font-size: 4vw;
+      z-index: 100;
+      transition: all 1s ease;
+    }
+
+    /* ------------------------------ Total Slide    ------------------------- */
+
+    .rapslide {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      z-index: 99;
+    }
+
+
+    /* ------------------------------- Second Slide ---------------------------------------- */
+
+    .second-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .second-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .second-slide .content {
+      max-width: 800px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .center-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .slide-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3vh;
+      justify-content: center;
+      align-items: flex-start;
+      width: 50%;
+      height: auto;
+    }
+
+    .left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex: 1;
+      gap: 4vh;
+      position: relative;
+    }
+
+    .with-arrows {
+      position: relative;
+    }
+
+    .arrow-target1 {
+      position: relative;
+    }
+
+    .arrow-target1::before {
+      content: '';
+      position: absolute;
+      right: -2.5vw;
+      top: 50%;
+      width: 2vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target1::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target2 {
+      position: relative;
+    }
+
+    .arrow-target2::before {
+      content: '';
+      position: absolute;
+      right: -4.3vw;
+      top: 50%;
+      width: 4vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target2::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target3 {
+      position: relative;
+    }
+
+    .arrow-target3::before {
+      content: '';
+      position: absolute;
+      right: -8vw;
+      top: 50%;
+      width: 7.5vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target3::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target4 {
+      position: relative;
+    }
+
+    .arrow-target4::before {
+      content: '';
+      position: absolute;
+      right: -8.7vw;
+      top: 50%;
+      width: 8.2vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target4::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .spec-box1 {
+      background-color: #1877F2;
+      color: #FFFFFF;
+      font-size: 1.5vw;
+      padding: 2vw 1vw 2vw 1vw;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+      width: 14vw;
+      text-align: center;
+    }
+
+
+    .spec-box {
+      background: white;
+      color: black;
+      font-size: 1.1vw;
+      padding: 1vw;
+      border-radius: 0.5vw;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .valve-image {
+      width: 100%;
+      max-width: 350px;
+      background-color: #FFFFFF;
+    }
+
+    .product-description {
+      font-size: 1vw;
+      color: white;
+      line-height: 1.6;
+      text-align: left;
+      background-color: #1161C9;
+      max-width: 350px;
+      padding: .5vw;
+    }
+
+
+    .page-indicator {
+      position: fixed;
+      bottom: 2vh;
+      right: 2vw;
+      font-size: 1vw;
+      color: #D20809;
+      font-weight: 600;
+      background-color: transparent;
+      padding: 0.5vw 2vw;
+      border-radius: 0.5vw;
+      z-index: 999999;
+      border: 1px solid #898989;
+    }
+
+
+    .arrow-stack {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 3vh;
+      align-items: flex-end;
+    }
+
+    .arrow-stack::before {
+      content: '';
+      position: absolute;
+      bottom: 1.8vw;
+      right: -1.3vw;
+      width: 2px;
+      height: 38vh;
+      background-color: #1877F2;
+      z-index: 0;
+    }
+
+    .spec-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      /* To keep right alignment */
+    }
+
+    .black-bg {
+      background-color: #000000;
+    }
+
+
+
+    /* --------------------------- THIRD SLIDE  ------------------------------- */
+    .details-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .details-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .details-heading {
+      font-size: 16vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .details-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    /* Left Column Group */
+    .details-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex: 1;
+    }
+
+    /* White box on top for alignment */
+    .white-placeholder-box {
+      background-color: #FFFFFF;
+      width: 14vw;
+      height: 8vw;
+    }
+
+
+    /* Feature Description Box */
+    .details-description {
+      background-color: #1161C9;
+      color: white;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+    }
+
+    /* Feature List */
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6vw;
+      margin-bottom: 1vh;
+      font-size: 1vw;
+      line-height: 2;
+    }
+
+    .feature-list img {
+      width: 1vw;
+      height: auto;
+      margin-top: 0.5vw;
+    }
+
+    /* Right Column for Video */
+    .details-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column video {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Optional: Vertical line in center */
+    .details-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .details-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+
+
+
+    /* --------------------------- FOURTH SLIDE  ------------------------------- */
+    .fourth-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .fourth-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fourth-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .fourth-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .fourth-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .fourth-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex: 1;
+      position: relative;
+    }
+
+    .fourth-arrow-stack {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .fourth-arrow-stack::before {
+      content: '';
+      position: absolute;
+      bottom: 1.8vw;
+      right: -1.3vw;
+      width: 2px;
+      height: 38vh;
+      background-color: #1877F2;
+      z-index: 0;
+    }
+
+    .fourth-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .fourth-box img {
+      width: auto;
+      height: auto;
+      padding-right: .2vw;
+    }
+
+    .fourth-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .fourth-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Styling for the vertical line */
+    .fourth-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .fourth-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-description1 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+    }
+
+    /* --------------------------- FIFTH SLIDE  ------------------------------- */
+    .fifth-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .fifth-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fifth-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .fifth-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .fifth-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .fifth-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+
+    .fifth-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .fifth-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .fifth-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Styling for the vertical line */
+    .fifth-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .fifth-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-right-column1 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column1 img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .details-description2 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+      border-radius: .5vw;
+    }
+
+    .spec-header-row1 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      /* To keep right alignment */
+    }
+
+    /* --------------------------- SIX SLIDE  ------------------------------- */
+    .six-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .six-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .six-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .six-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .six-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .six-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+
+    .six-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .six-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .six-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Styling for the vertical line */
+    .six-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .six-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-right-column2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column2 img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .details-description2 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+      border-radius: .5vw;
+    }
+
+    .spec-header-row2 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      /* To keep right alignment */
+    }
+
+
+    /* --------------------------- SEVEN SLIDE  ------------------------------- */
+    .seven-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .seven-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .seven-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .seven-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .seven-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .seven-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+
+    .seven-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .seven-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .seven-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Styling for the vertical line */
+    .seven-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .seven-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-right-column2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column2 img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .details-description2 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+      border-radius: .5vw;
+    }
+
+    .spec-header-row3 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      /* To keep right alignment */
+    }
+
+    /* --------------------------- EIGHT SLIDE  ------------------------------- */
+    .eight-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .eight-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .eight-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .eight-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .eight-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .eight-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+
+    .eight-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .eight-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .eight-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Styling for the vertical line */
+    .eight-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .eight-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-right-column2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column2 img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .details-description2 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+      border-radius: .5vw;
+    }
+
+    .spec-header-row3 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      /* To keep right alignment */
+    }
+
+    /* --------------------------- NINE SLIDE  ------------------------------- */
+    .nine-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .nine-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .nine-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .nine-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .nine-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .nine-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+
+    .nine-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .nine-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .nine-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Styling for the vertical line */
+    .nine-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .nine-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-right-column2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column2 img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .details-description2 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+      border-radius: .5vw;
+    }
+
+    .spec-header-row3 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      /* To keep right alignment */
+    }
+
+
+    /* --------------------------- TEN SLIDE  ------------------------------- */
+    /* .ten-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .ten-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .ten-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .ten-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .ten-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .ten-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+
+    .ten-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .ten-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .ten-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+   \
+    .ten-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .ten-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-right-column2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column2 img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .details-description2 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+      border-radius: .5vw;
+    }
+
+    .spec-header-row3 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+  
+    } */
+
+    /* --------------------------- ELEVEN SLIDE  ------------------------------- */
+    /* .eleven-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .eleven-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .eleven-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .eleven-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .eleven-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .eleven-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+
+    .eleven-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .eleven-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .eleven-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .eleven-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .eleven-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-right-column2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column2 img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .details-description2 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+      border-radius: .5vw;
+    }
+
+    .spec-header-row3 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+    } */
+
+
+    /* --------------------------- TWELEVE SLIDE  ------------------------------- */
+    /* .tewleve-slide {
+      width: 100vw;
+      height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: absolute;
+      z-index: 999999;
+    }
+
+    .tewleve-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .tewleve-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .tewleve-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5vh 5vw;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .tewleve-left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      background-color: #FFFFFF;
+    }
+
+    .tewleve-left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+
+    .tewleve-box {
+      color: black;
+      font-size: .8vw;
+      padding: 1vw;
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .tewleve-right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 2.5vw;
+    }
+
+    .tewleve-valve-img {
+      position: relative;
+    }
+
+    .standard-diverter-text {
+      background-color: white;
+      padding: 10px 20px;
+      color: black;
+      font-size: 1.2vw;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .red-dot {
+      width: 15px;
+      height: 15px;
+      background-color: red;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+
+    .circle-slider {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slider-item {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.5s ease;
+      width: 100%;
+    }
+
+    .slider-item.active {
+      display: flex;
+    }
+
+    .slider-item img {
+      max-width: 150px;
+      max-height: 150px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .slider-item-text {
+      color: black;
+      font-size: 1.2vw;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .tewleve-vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .tewleve-vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .details-right-column2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .details-right-column2 img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+
+    .details-description2 {
+      background-color: #FFFFFF;
+      color: #000000;
+      padding: 2.5vw 1vw 2.5vw 1vw;
+      max-width: 28vw;
+      border-radius: .5vw;
+    }
+
+    .spec-header-row3 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+    } */
+
+
+
+    /* --------------------------  Media Query----------------------------- */
+
+    @media (max-width: 1700px) {
+      .text {
+        font-size: 4rem;
+      }
+
+      .zoom-out .text:first-child {
+        left: 3%;
+      }
+    }
+
+    @media (max-width: 1300px) {
+      .text {
+        font-size: 3rem;
+      }
+
+      .zoom-out .text:first-child {
+        left: 3%;
+      }
+    }
+  </style>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+
+  <div class="container" id="container">
+    <img src="./images/homebg.webp" alt="BannerImage" class="bg-video" id="bgVideo" />
+    <img src="./images/rapengineeringlogo.png" alt="rapengineeringlogo" class="top-left-logo" />
+
+    <nav class="navbar" id="navbar">
+      <select class="dropdown">
+        <option selected disabled>Home</option>
+        <option>About</option>
+        <option>Explainer</option>
+        <option>Valveco DTD</option>
+        <option>DTD</option>
+        <option>SDTD</option>
+        <option>SDTD-C</option>
+        <option>Y-Valve</option>
+        <option>BDV</option>
+        <option>DTD Parts</option>
+        <option>Different Installation</option>
+        <option>Selling points</option>
+      </select>
+      <div class="social-icons">
+        <i class="fab fa-linkedin"></i>
+        <i class="fab fa-facebook"></i>
+        <i class="fab fa-youtube"></i>
+        <i class="fa-brands fa-square-x-twitter"></i>
+      </div>
+    </nav>
+
+    <div class="bullseye-mask" id="bullseyeMask"></div>
+
+    <div class="first-circle" id="circle">
+      <div class="circle-content">
+        <div class="text">DIVERTER</div>
+        <img src="./images/DTDnew.png" class="center-image" alt="DTD" />
+        <div class="text">
+          <span class="valve-letter">V</span>ALVE
+        </div>
+      </div>
+    </div>
+
+    <section class="rapslide">
+
+      <!-- ********************************* second-slide **************************************** -->
+
+      <div class="second-slide page-section" id="secondSlide">
+        <div class="center-heading">INFO</div>
+        <div class="slide-content">
+          <div class="left-group">
+            <div class="spec-header-row">
+              <div class="spec-box1 with-arrows black-bg">PRODUCT</div>
+              <div class="spec-box1 with-arrows">APPLICATION</div>
+            </div>
+            <div class="left-column">
+              <div class="arrow-stack">
+                <div class="spec-box arrow-target1" style="right: 10%;">Diverging</div>
+                <div class="spec-box arrow-target2" style="right: 25%;">Converging</div>
+                <div class="spec-box arrow-target3" style="right: 55%;">Pressure conveying</div>
+                <div class="spec-box arrow-target4" style="right: 60%;">Vacuum conveying</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column -->
+          <div class="right-column">
+            <img src="./images/DTDnew.png" alt="Valve Image" class="valve-image" />
+            <div class="product-description">
+              Diverter Valves direct material from one source to multiple destinations and make sure that conveying air
+              and product are forwarded with low resistance.
+            </div>
+          </div>
+        </div>
+        <div class="vertical-line" id="verticalLine"></div>
+        <div class="page-indicator" id="pageIndicator">1 / 11</div>
+      </div>
+
+      <!-- ********************************* third-slide **************************************** -->
+
+      <div class="details-slide page-section" id="detailsSlide">
+        <div class="details-heading">FEATURES</div>
+        <div class="details-content">
+          <!-- Left Side -->
+          <div class="details-left-group">
+            <!-- White Placeholder Box aligned with 'APPLICATION' -->
+            <div class="white-placeholder-box"></div>
+
+            <!-- PRODUCT + APPLICATION in one row -->
+            <div class="spec-header-row">
+              <div class="spec-box1 black-bg">PRODUCT</div>
+              <div class="spec-box1">FEATURES</div>
+            </div>
+
+            <!-- Feature list inside colored box -->
+            <div class="details-description">
+              <ul class="feature-list">
+                <li><img src="./images/Vector.png" alt=""> Compact design</li>
+                <li><img src="./images/Vector.png" alt=""> Metal-to-metal clearances ( like Rotary valve ) that
+                  eliminate frequent part replacement</li>
+                <li><img src="./images/Vector.png" alt=""> Self venting - Local venting or dust collection is not
+                  required at the receiving / deposit point</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Right Side Video -->
+          <div class="details-right-column">
+            <video src="./images/AIRLOCKDTDD.mp4" autoplay loop muted></video>
+          </div>
+        </div>
+        <div class="details-vertical-line"></div>
+      </div>
+
+
+      <!-- ********************************* fourth-slide **************************************** -->
+
+      <div class="fourth-slide page-section" id="fourthSlide">
+        <div class="fourth-heading">TYPES</div>
+        <div class="fourth-content">
+          <div class="fourth-left-group">
+            <div class="spec-header-row">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+            <div class="details-description1">
+              <ul class="feature-list">
+                <li><img src="./images/Vector.png" alt=""> Compact design</li>
+                <li><img src="./images/Vector.png" alt=""> Metal-to-metal clearances ( like Rotary valve ) that
+                  eliminate frequent part replacement</li>
+                <li><img src="./images/Vector.png" alt=""> Self venting - Local venting or dust collection is not
+                  required at the receiving / deposit point</li>
+                <li><img src="./images/Vector.png" alt=""> Easy assembly and disassembly for maintenance purposes</li>
+                <li><img src="./images/Vector.png" alt=""> Durable materials that withstand high pressure and
+                  temperature variations</li>
+                <li><img src="./images/Vector.png" alt=""> Modular components that allow for customization and
+                  scalability in design</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fourth-right-column">
+            <div class="fourth-valve-img">
+              <div class="standard-diverter-text">
+                <div class="red-dot"></div> Standard Diverter Valve
+              </div>
+            </div>
+            <!-- <div class="circle-slider">
+              <div class="slider-item active">
+                <div class="slider-item-text">Product 1</div>
+                <img src="./images/DTDnew.png" alt="Product 1">
+              </div>
+              <div class="slider-item">
+                <div class="slider-item-text">Product 2</div>
+                <img src="./images/DTDnew.png" alt="Product 2">
+              </div>
+              <div class="slider-item">
+                <div class="slider-item-text">Product 3</div>
+                <img src="./images/DTDnew.png" alt="Product 3">
+              </div>
+              <div class="slider-item">
+                <div class="slider-item-text">Product 4</div>
+                <img src="./images/DTDnew.png" alt="Product 4">
+              </div>
+            </div> -->
+          </div>
+        </div>
+        <div class="fourth-vertical-line"></div>
+      </div>
+
+      <!-- ********************************* fifth-slide **************************************** -->
+
+      <div class="fifth-slide page-section" id="fifthSlide">
+        <div class="fifth-heading">HOW</div>
+        <div class="fifth-content">
+          <div class="fifth-left-group">
+            <div class="details-description2">
+              <ul class="feature-list">
+                <li><img src="./images/Vector.png" alt=""> Compact design</li>
+                <li><img src="./images/Vector.png" alt=""> Metal-to-metal clearances ( like Rotary valve ) that
+                  eliminate frequent part replacement</li>
+                <li><img src="./images/Vector.png" alt=""> Self venting - Local venting or dust collection is not
+                  required at the receiving / deposit point</li>
+                <li><img src="./images/Vector.png" alt=""> Easy assembly and disassembly for maintenance purposes</li>
+                <li><img src="./images/Vector.png" alt=""> Durable materials that withstand high pressure and
+                  temperature variations</li>
+                <li><img src="./images/Vector.png" alt=""> Modular components that allow for customization and
+                  scalability in design</li>
+              </ul>
+            </div>
+            <div class="spec-header-row1">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+          </div>
+
+          <div class="details-right-column1">
+            <img src="./images/DTDnew.png" alt="">
+          </div>
+
+        </div>
+        <div class="fifth-vertical-line"></div>
+      </div>
+
+      <!-- ********************************* six-slide **************************************** -->
+
+      <div class="six-slide page-section" id="sixSlide">
+        <div class="six-heading">HOW</div>
+        <div class="six-content">
+          <div class="six-left-group">
+            <div class="spec-header-row2">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+            <div class="details-right-column2">
+              <img src="./images/DTDnew.png" alt="">
+            </div>
+            <div class="details-description3">
+              <ul class="feature-list">
+                <li><img src="./images/Vector.png" alt=""> Compact design</li>
+                <li><img src="./images/Vector.png" alt=""> Metal-to-metal clearances ( like Rotary valve ) that
+                  eliminate frequent part replacement</li>
+                <li><img src="./images/Vector.png" alt=""> Self venting - Local venting or dust collection is not
+                  required at the receiving / deposit point</li>
+                <li><img src="./images/Vector.png" alt=""> Easy assembly and disassembly for maintenance purposes</li>
+                <li><img src="./images/Vector.png" alt=""> Durable materials that withstand high pressure and
+                  temperature variations</li>
+                <li><img src="./images/Vector.png" alt=""> Modular components that allow for customization and
+                  scalability in design</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="six-vertical-line"></div>
+      </div>
+
+
+      <!-- ********************************* seven-slide **************************************** -->
+
+      <div class="seven-slide page-section" id="sevenSlide">
+        <div class="seven-heading">HOW</div>
+        <div class="seven-content">
+          <div class="seven-left-group">
+            <div class="spec-header-row3">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+            <div class="details-right-column2">
+              <img src="./images/DTDnew.png" alt="">
+            </div>
+            <div class="details-description3">
+              <ul class="feature-list">
+                <li><img src="./images/Vector.png" alt=""> Compact design</li>
+                <li><img src="./images/Vector.png" alt=""> Metal-to-metal clearances ( like Rotary valve ) that
+                  eliminate frequent part replacement</li>
+                <li><img src="./images/Vector.png" alt=""> Self venting - Local venting or dust collection is not
+                  required at the receiving / deposit point</li>
+                <li><img src="./images/Vector.png" alt=""> Easy assembly and disassembly for maintenance purposes</li>
+                <li><img src="./images/Vector.png" alt=""> Durable materials that withstand high pressure and
+                  temperature variations</li>
+                <li><img src="./images/Vector.png" alt=""> Modular components that allow for customization and
+                  scalability in design</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="seven-vertical-line"></div>
+      </div>
+
+      <!-- ********************************* Eight-slide **************************************** -->
+
+      <div class="eight-slide page-section" id="eightSlide">
+        <div class="eight-heading">HOW</div>
+        <div class="eight-content">
+          <div class="eight-left-group">
+            <div class="spec-header-row3">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+            <div class="details-right-column2">
+              <img src="./images/DTDnew.png" alt="">
+            </div>
+            <div class="details-description3">
+              <ul class="feature-list">
+                <li><img src="./images/Vector.png" alt=""> Compact design</li>
+                <li><img src="./images/Vector.png" alt=""> Metal-to-metal clearances ( like Rotary valve ) that
+                  eliminate frequent part replacement</li>
+                <li><img src="./images/Vector.png" alt=""> Self venting - Local venting or dust collection is not
+                  required at the receiving / deposit point</li>
+                <li><img src="./images/Vector.png" alt=""> Easy assembly and disassembly for maintenance purposes</li>
+                <li><img src="./images/Vector.png" alt=""> Durable materials that withstand high pressure and
+                  temperature variations</li>
+                <li><img src="./images/Vector.png" alt=""> Modular components that allow for customization and
+                  scalability in design</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="eight-vertical-line"></div>
+      </div>
+
+      <!-- ********************************* Nine-slide **************************************** -->
+
+      <div class="nine-slide page-section" id="nineSlide">
+        <div class="nine-heading">HOW</div>
+        <div class="nine-content">
+          <div class="nine-left-group">
+            <div class="spec-header-row3">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+            <div class="details-right-column2">
+              <img src="./images/DTDnew.png" alt="">
+            </div>
+            <div class="details-description3">
+              <ul class="feature-list">
+                <li><img src="./images/Vector.png" alt=""> Compact design</li>
+                <li><img src="./images/Vector.png" alt=""> Metal-to-metal clearances ( like Rotary valve ) that
+                  eliminate frequent part replacement</li>
+                <li><img src="./images/Vector.png" alt=""> Self venting - Local venting or dust collection is not
+                  required at the receiving / deposit point</li>
+                <li><img src="./images/Vector.png" alt=""> Easy assembly and disassembly for maintenance purposes</li>
+                <li><img src="./images/Vector.png" alt=""> Durable materials that withstand high pressure and
+                  temperature variations</li>
+                <li><img src="./images/Vector.png" alt=""> Modular components that allow for customization and
+                  scalability in design</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="nine-vertical-line"></div>
+      </div>
+
+
+      <!-- ************** Ten-slide ************** -->
+
+      <!-- <div class="ten-slide page-section" id="tenSlide">
+        <div class="ten-heading">HOW</div>
+        <div class="ten-content">
+
+
+          <div class="ten-left-group">
+            <div class="details-description3">
+              <p>
+                Our valve designs offer compact construction, robust durability, and a modular layout for customization.
+                They are self-venting and easy to maintain, ensuring long-term performance under high pressure and
+                temperature.
+              </p>
+            </div>
+
+            <div class="details-images">
+              <img src="./images/image1.png" alt="Image 1">
+              <img src="./images/image2.png" alt="Image 2">
+            </div>
+          </div>
+
+ 
+          <div class="ten-right-group">
+            <div class="spec-header-row3">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+            <div class="details-right-column2">
+              <img src="./images/DTDnew.png" alt="Scale Valve Image">
+            </div>
+          </div>
+
+        </div>
+        <div class="ten-vertical-line"></div>
+      </div> -->
+
+      <!-- ************** Eleven-slide ************** -->
+
+      <!-- <div class="eleven-slide page-section" id="elevenSlide">
+        <div class="eleven-heading">HOW</div>
+        <div class="eleven-content">
+
+          <div class="eleven-left-group">
+            <div class="details-description3">
+              <p>
+                Our valve designs offer compact construction, robust durability, and a modular layout for customization.
+                They are self-venting and easy to maintain, ensuring long-term performance under high pressure and
+                temperature.
+              </p>
+            </div>
+
+            <div class="details-images">
+              <img src="./images/image1.png" alt="Image 1">
+              <img src="./images/image2.png" alt="Image 2">
+            </div>
+          </div>
+
+         
+          <div class="eleven-right-group">
+            <div class="spec-header-row3">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+            <div class="details-right-column2">
+              <img src="./images/DTDnew.png" alt="Scale Valve Image">
+            </div>
+          </div>
+
+        </div>
+        <div class="eleven-vertical-line"></div>
+      </div> -->
+
+      <!-- ************** Tweleve-slide ************** -->
+
+      <!-- <div class="tweleve-slide page-section" id="tweleveSlide">
+        <div class="tweleve-heading">HOW</div>
+        <div class="tweleve-content">
+
+          <div class="tweleve-left-group">
+            <div class="details-description3">
+              <p>
+                Our valve designs offer compact construction, robust durability, and a modular layout for customization.
+                They are self-venting and easy to maintain, ensuring long-term performance under high pressure and
+                temperature.
+              </p>
+            </div>
+
+            <div class="details-images">
+              <img src="./images/image1.png" alt="Image 1">
+              <img src="./images/image2.png" alt="Image 2">
+            </div>
+          </div>
+
+          <div class="tweleve-right-group">
+            <div class="spec-header-row3">
+              <div class="spec-box1 black-bg">TYPES OF</div>
+              <div class="spec-box1">SCALE VALVE</div>
+            </div>
+            <div class="details-right-column2">
+              <img src="./images/DTDnew.png" alt="Scale Valve Image">
+            </div>
+          </div>
+
+        </div>
+        <div class="tweleve-vertical-line"></div>
+      </div> -->
+
+
+    </section>
+
+  </div>
+
+  <script>
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+
+    const circle = document.getElementById('circle');
+    const bgVideo = document.getElementById('bgVideo');
+    const bullseyeMask = document.getElementById('bullseyeMask');
+    const body = document.body;
+    const navbar = document.getElementById('navbar');
+    const centerImage = document.querySelector('.center-image');
+    const textTop = document.querySelector('.text:first-child');
+    const textBottom = document.querySelector('.text:last-child');
+    const valveLetter = document.querySelector('.valve-letter');
+    const secondSlide = document.getElementById('secondSlide');
+    const verticalLine = document.getElementById('verticalLine');
+
+    const detailsSlide = document.getElementById('detailsSlide');
+    const detailsVerticalLine = detailsSlide?.querySelector('.details-vertical-line');
+
+    const fourthSlide = document.getElementById('fourthSlide');
+    const fourthVerticalLine = fourthSlide?.querySelector('.fourth-vertical-line');
+
+    const fifthSlide = document.getElementById('fifthSlide');
+    const fifthVerticalLine = fifthSlide?.querySelector('.fifth-vertical-line');
+
+    const sixthSlide = document.getElementById('sixthSlide');
+    const sixthVerticalLine = sixthSlide?.querySelector('.sixth-vertical-line');
+
+    const seventhSlide = document.getElementById('seventhSlide');
+    const seventhVerticalLine = seventhSlide?.querySelector('.seventh-vertical-line');
+
+    const eighthSlide = document.getElementById('eighthSlide');
+    const eighthVerticalLine = eighthSlide?.querySelector('.eighth-vertical-line');
+
+    const ninthSlide = document.getElementById('ninthSlide');
+    const ninthVerticalLine = ninthSlide?.querySelector('.ninth-vertical-line');
+
+    // Animation state flags
+    let hasAnimatedV = false;
+    let hasShownSecondSlide = false;
+    let hasShownDetailsSlide = false;
+    let hasShownFourthSlide = false;
+    let hasShownFifthSlide = false;
+    let hasShownSixthSlide = false;
+    let hasShownSeventhSlide = false;
+    let hasShownEighthSlide = false;
+    let hasShownNinthSlide = false;
+
+    let textAnimationCompleted = false;
+    let secondSlideAnimationCompleted = false;
+    let detailsSlideAnimationCompleted = false;
+    let fourthSlideAnimationCompleted = false;
+    let fifthSlideAnimationCompleted = false;
+    let sixthSlideAnimationCompleted = false;
+    let seventhSlideAnimationCompleted = false;
+    let eighthSlideAnimationCompleted = false;
+    let ninthSlideAnimationCompleted = false;
+
+    // Transition end listeners
+    textBottom.addEventListener('transitionend', () => {
+      textAnimationCompleted = true;
+    });
+
+    secondSlide.addEventListener('transitionend', () => {
+      secondSlideAnimationCompleted = true;
+    });
+
+    if (detailsSlide) {
+      detailsSlide.addEventListener('transitionend', () => {
+        detailsSlideAnimationCompleted = true;
+      });
+    }
+
+    if (fourthSlide) {
+      fourthSlide.addEventListener('transitionend', () => {
+        fourthSlideAnimationCompleted = true;
+      });
+    }
+
+    if (fifthSlide) {
+      fifthSlide.addEventListener('transitionend', () => {
+        fifthSlideAnimationCompleted = true;
+      });
+    }
+
+    if (sixthSlide) {
+      sixthSlide.addEventListener('transitionend', () => {
+        sixthSlideAnimationCompleted = true;
+      });
+    }
+
+    if (seventhSlide) {
+      seventhSlide.addEventListener('transitionend', () => {
+        seventhSlideAnimationCompleted = true;
+      });
+    }
+
+    if (eighthSlide) {
+      eighthSlide.addEventListener('transitionend', () => {
+        eighthSlideAnimationCompleted = true;
+      });
+    }
+
+    if (ninthSlide) {
+      ninthSlide.addEventListener('transitionend', () => {
+        ninthSlideAnimationCompleted = true;
+      });
+    }
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+
+      // Trigger V animation
+      if (scrollY > 250 && !hasAnimatedV) {
+        hasAnimatedV = true;
+
+        circle.classList.add('zoom-out');
+        bullseyeMask.classList.add('zoom-out');
+        bgVideo.style.opacity = 0;
+        body.classList.add('gray-bg');
+
+        setTimeout(() => {
+          navbar.style.display = 'flex';
+          navbar.classList.add('visible');
+
+          centerImage.classList.add('fade-out');
+          textTop.classList.add('scroll-to-top');
+          textBottom.classList.add('scroll-to-top');
+
+          valveLetter.classList.add('draw-line');
+          textBottom.classList.add('center-valve-text');
+        }, 2000);
+      }
+
+      // Show secondSlide
+      if (scrollY > 450 && hasAnimatedV && textAnimationCompleted && !hasShownSecondSlide) {
+        hasShownSecondSlide = true;
+        secondSlide.classList.add('visible');
+        verticalLine.classList.add('active');
+      }
+
+      // Show detailsSlide
+      if (
+        scrollY > 550 &&
+        hasShownSecondSlide &&
+        secondSlideAnimationCompleted &&
+        !hasShownDetailsSlide
+      ) {
+        hasShownDetailsSlide = true;
+        detailsSlide.classList.add('visible');
+        detailsVerticalLine?.classList.add('active');
+      }
+
+      // Show fourthSlide
+      if (
+        scrollY > 650 &&
+        hasShownDetailsSlide &&
+        detailsSlideAnimationCompleted &&
+        !hasShownFourthSlide
+      ) {
+        hasShownFourthSlide = true;
+        fourthSlide.classList.add('visible');
+        fourthVerticalLine?.classList.add('active');
+      }
+
+      // Show fifthSlide
+      if (
+        scrollY > 750 &&
+        hasShownFourthSlide &&
+        fourthSlideAnimationCompleted &&
+        !hasShownFifthSlide
+      ) {
+        hasShownFifthSlide = true;
+        fifthSlide.classList.add('visible');
+        fifthVerticalLine?.classList.add('active');
+      }
+
+      // Show sixthSlide
+      if (
+        scrollY > 850 &&
+        hasShownFifthSlide &&
+        fifthSlideAnimationCompleted &&
+        !hasShownSixthSlide
+      ) {
+        hasShownSixthSlide = true;
+        sixthSlide.classList.add('visible');
+        sixthVerticalLine?.classList.add('active');
+      }
+
+      // Show seventhSlide
+      if (
+        scrollY > 950 &&
+        hasShownSixthSlide &&
+        sixthSlideAnimationCompleted &&
+        !hasShownSeventhSlide
+      ) {
+        hasShownSeventhSlide = true;
+        seventhSlide.classList.add('visible');
+        seventhVerticalLine?.classList.add('active');
+      }
+
+      // Show eighthSlide
+      if (
+        scrollY > 1050 &&
+        hasShownSeventhSlide &&
+        seventhSlideAnimationCompleted &&
+        !hasShownEighthSlide
+      ) {
+        hasShownEighthSlide = true;
+        eighthSlide.classList.add('visible');
+        eighthVerticalLine?.classList.add('active');
+      }
+
+      // Show ninthSlide
+      if (
+        scrollY > 1150 &&
+        hasShownEighthSlide &&
+        eighthSlideAnimationCompleted &&
+        !hasShownNinthSlide
+      ) {
+        hasShownNinthSlide = true;
+        ninthSlide.classList.add('visible');
+        ninthVerticalLine?.classList.add('active');
+      }
+
+      // Reset all when scrolling back to top
+      if (
+        scrollY <= 250 &&
+        (hasAnimatedV || hasShownSecondSlide || hasShownDetailsSlide || hasShownFourthSlide || hasShownFifthSlide ||
+          hasShownSixthSlide || hasShownSeventhSlide || hasShownEighthSlide || hasShownNinthSlide)
+      ) {
+        hasAnimatedV = false;
+        hasShownSecondSlide = false;
+        hasShownDetailsSlide = false;
+        hasShownFourthSlide = false;
+        hasShownFifthSlide = false;
+        hasShownSixthSlide = false;
+        hasShownSeventhSlide = false;
+        hasShownEighthSlide = false;
+        hasShownNinthSlide = false;
+
+        textAnimationCompleted = false;
+        secondSlideAnimationCompleted = false;
+        detailsSlideAnimationCompleted = false;
+        fourthSlideAnimationCompleted = false;
+        fifthSlideAnimationCompleted = false;
+        sixthSlideAnimationCompleted = false;
+        seventhSlideAnimationCompleted = false;
+        eighthSlideAnimationCompleted = false;
+        ninthSlideAnimationCompleted = false;
+
+        circle.classList.remove('zoom-out');
+        bullseyeMask.classList.remove('zoom-out');
+        bgVideo.style.opacity = 1;
+        body.classList.remove('gray-bg');
+        navbar.classList.remove('visible');
+
+        setTimeout(() => {
+          navbar.style.display = 'none';
+        }, 500);
+
+        centerImage.classList.remove('fade-out');
+        textTop.classList.remove('scroll-to-top');
+        textBottom.classList.remove('scroll-to-top');
+
+        valveLetter.classList.remove('draw-line');
+        textBottom.classList.remove('center-valve-text');
+
+        secondSlide.classList.remove('visible');
+        verticalLine.classList.remove('active');
+
+        detailsSlide?.classList.remove('visible');
+        detailsVerticalLine?.classList.remove('active');
+
+        fourthSlide?.classList.remove('visible');
+        fourthVerticalLine?.classList.remove('active');
+
+        fifthSlide?.classList.remove('visible');
+        fifthVerticalLine?.classList.remove('active');
+
+        sixthSlide?.classList.remove('visible');
+        sixthVerticalLine?.classList.remove('active');
+
+        seventhSlide?.classList.remove('visible');
+        seventhVerticalLine?.classList.remove('active');
+
+        eighthSlide?.classList.remove('visible');
+        eighthVerticalLine?.classList.remove('active');
+
+        ninthSlide?.classList.remove('visible');
+        ninthVerticalLine?.classList.remove('active');
+      }
+    });
+
+    // Pagination indicator
+    const pageIndicator = document.getElementById('pageIndicator');
+    const sections = document.querySelectorAll('.page-section');
+    const totalPages = sections.length;
+
+    function updatePageIndicator() {
+      let currentPage = 1;
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        if (
+          rect.top <= window.innerHeight / 2 &&
+          rect.bottom >= window.innerHeight / 2
+        ) {
+          currentPage = index + 1;
+        }
+      });
+      pageIndicator.textContent = `${currentPage} / ${totalPages}`;
+    }
+
+    window.addEventListener('scroll', updatePageIndicator);
+    window.addEventListener('load', updatePageIndicator);
+  </script>
+
+
+
+
+
+
+
+  <script>
+    const sliderItems = document.querySelectorAll('.slider-item');
+    let currentItemIndex = 0;
+
+    function showNextSlide() {
+      sliderItems[currentItemIndex].classList.remove('active');
+      currentItemIndex = (currentItemIndex + 1) % sliderItems.length;
+      sliderItems[currentItemIndex].classList.add('active');
+    }
+    setInterval(showNextSlide, 3000);
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valve Type Selector</title>
+    <style>
+        /* General styling for the page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Fourth slide styles */
+        .fourth-slide {
+            width: 100vw;
+            height: 100vh;
+            padding: 10vh 5vw;
+            background-color: #D6D6D6;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease, transform 1s ease;
+            position: absolute;
+            z-index: 999999;
+            visibility: hidden;
+        }
+
+        .fourth-slide.visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        /* Heading styling */
+        .fourth-heading {
+            font-size: 20vw;
+            color: transparent;
+            -webkit-text-stroke: 2px #FFFFFF;
+            text-stroke: 2px #FFFFFF;
+            position: absolute;
+            z-index: -1;
+            font-family: "Open Sans";
+            font-weight: 800;
+        }
+
+        /* Content layout */
+        .fourth-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 5vh 5vw;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Left column styles */
+        .fourth-left-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            width: 50%;
+            background-color: #FFFFFF;
+        }
+
+        .fourth-left-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            flex: 1;
+            position: relative;
+        }
+
+        .details-description1 {
+            background-color: #FFFFFF;
+            color: #000000;
+            padding: 2.5vw 1vw 2.5vw 1vw;
+            max-width: 28vw;
+        }
+
+        /* Right column styles */
+        .fourth-right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-left: 2.5vw;
+            gap: 5vh;
+        }
+
+        .fourth-valve-img {
+            position: relative;
+        }
+
+        .standard-diverter-text {
+            background-color: white;
+            padding: 10px 20px;
+            color: black;
+            font-size: 1.2vw;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px;
+        }
+
+        .red-dot {
+            width: 15px;
+            height: 15px;
+            background-color: red;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Circle container */
+        .circle-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circle-bg {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background-color: white;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .valve-image1 {
+            width: 180px;
+            height: 180px;
+        }
+
+        /* Circle segments */
+        .circle-segment {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            transform-origin: center;
+        }
+
+        /* Styling for each segment */
+        .segment-dtd {
+            background-color: #4a90e2;
+            transform: rotate(0deg);
+            clip-path: polygon(50% 50%, 100% 0%, 100% 100%, 66% 100%);
+        }
+
+        .segment-btm {
+            background-color: #4a90e2;
+            transform: rotate(90deg);
+            clip-path: polygon(50% 50%, 100% 0%, 100% 100%, 66% 100%);
+        }
+
+        .segment-valve {
+            background-color: #4a90e2;
+            transform: rotate(180deg);
+            clip-path: polygon(50% 50%, 100% 0%, 100% 100%, 66% 100%);
+        }
+
+        .segment-sdtd {
+            background-color: #222;
+            transform: rotate(270deg);
+            clip-path: polygon(50% 50%, 100% 0%, 100% 100%, 66% 100%);
+        }
+
+        .segment-label {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            font-size: 2vw;
+            text-transform: uppercase;
+            z-index: 4;
+        }
+
+        .label-dtd {
+            top: 53%;
+            right: 1%;
+            transform: rotate(107deg);
+        }
+
+        .label-btm {
+            bottom: 3%;
+            right: 36%;
+            transform: rotate(178deg);
+        }
+
+        .label-valve {
+            bottom: 46%;
+            right: 80%;
+            transform: rotate(270deg);
+        }
+
+        .label-sdtd {
+            top: 4%;
+            left: 53%;
+            transform: rotate(372deg);
+        }
+
+        .active-segment {
+            background-color: #1B1B1B;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="fourth-slide page-section" id="fourthSlide">
+        <div class="fourth-heading">TYPES</div>
+        <div class="fourth-content">
+            <div class="fourth-left-group">
+                <div class="spec-header-row">
+                    <div class="spec-box1 black-bg">TYPES OF</div>
+                    <div class="spec-box1">SCALE VALVE</div>
+                </div>
+                <div class="details-description1" id="detailsDescription">
+                    <ul class="feature-list" id="featureList">
+                        <!-- Content will change dynamically based on the clicked valve -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="fourth-right-column">
+                <div class="fourth-valve-img">
+                    <div class="standard-diverter-text">
+                        <div class="red-dot"></div> Standard Diverter Valve
+                    </div>
+                </div>
+                <div class="right-panel">
+
+                    <div class="circle-container">
+                        <div class="circle-segment segment-dtd" style="background-color: #1B7AC8;"></div>
+                        <div class="circle-segment segment-btm" style="background-color: #448CDF;"></div>
+                        <div class="circle-segment segment-valve" style="background-color: #74B2ED;"></div>
+                        <div class="circle-segment segment-sdtd" style="background-color: #024591;"></div>
+
+                        <div class="segment-label label-dtd">DTD</div>
+                        <div class="segment-label label-btm">Y-type</div>
+                        <div class="segment-label label-valve">SDTD</div>
+                        <div class="segment-label label-sdtd">BDV</div>
+
+                        <div class="circle-bg">
+                            <img src="./images/DTDnew.png" alt="Valve" class="valve-image1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="fourth-vertical-line"></div>
+        <div class="page-indicator" id="pageIndicator">3 / 11</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const valveImage = document.querySelector('.valve-image1');
+            const segments = document.querySelectorAll('.circle-segment');
+            const detailsDescription = document.getElementById('detailsDescription');
+            const featureList = document.getElementById('featureList');
+
+            // Initial color values for segments
+            const originalColors = {
+                'segment-dtd': '#1B7AC8',
+                'segment-btm': '#448CDF',
+                'segment-valve': '#74B2ED',
+                'segment-sdtd': '#024591'
+            };
+
+            // Map segment class to valve info and left content
+            const valveMap = {
+                'segment-dtd': {
+                    image: './images/DTDnew.png',
+                    description: [
+                        'It is used with DT type RV. It\'s a transition piece connecting the RV outlet to the conveying line.',
+                        'It has a flange connection (available in DIN / ANSI / JIS) on the top and pipe connection (available in different sizes) on the bottom.',
+                        'Available in mild steel & stainless steel construction.'
+                    ]
+                },
+                'segment-btm': {
+                    image: './images/Ytype.png',
+                    description: [
+                        'Y-type valves are used for diverting flow in two directions.',
+                        'The valve has a flange connection on the top and pipe connection on the bottom.',
+                        'Available in cast iron & stainless steel construction.'
+                    ]
+                },
+                'segment-valve': {
+                    image: './images/SDTD.png',
+                    description: [
+                        'The SDTD valve is ideal for applications requiring high flow capacity.',
+                        'It features a robust, high-temperature resistance design.',
+                        'Made of durable materials for industrial applications.'
+                    ]
+                },
+                'segment-sdtd': {
+                    image: './images/BDV.png',
+                    description: [
+                        'The BDV valve is a standard diverter valve used in material handling systems.',
+                        'It helps in directing materials to different paths in conveying systems.',
+                        'Can be customized to various sizes and materials.'
+                    ]
+                }
+            };
+
+            // Add click listeners to segments
+            segments.forEach(segment => {
+                segment.style.cursor = 'pointer';
+                segment.addEventListener('click', () => {
+                    // Reset all segments to their original colors
+                    segments.forEach(seg => {
+                        for (let key in originalColors) {
+                            if (seg.classList.contains(key)) {
+                                seg.style.backgroundColor = originalColors[key];
+                            }
+                        }
+                    });
+
+                    // Change the clicked segment color to #1B1B1B
+                    segment.style.backgroundColor = '#1B1B1B';
+
+                    // Update the valve image and left-side content
+                    for (let key in valveMap) {
+                        if (segment.classList.contains(key)) {
+                            valveImage.src = valveMap[key].image;
+
+                            // Update the feature list
+                            featureList.innerHTML = '';  // Clear previous features
+                            valveMap[key].description.forEach(item => {
+                                const listItem = document.createElement('li');
+                                listItem.innerHTML = `<img src="./images/Vector.png" alt=""> ${item}`;
+                                featureList.appendChild(listItem);
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

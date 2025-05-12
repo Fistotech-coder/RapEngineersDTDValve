@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diverter Valve</title>
+
+  <!-- CSS -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 200vh;
+      font-family: 'Open Sans', sans-serif;
+      background-color: white;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      transition: background-color 1s ease;
+    }
+
+    body.gray-bg {
+      background-color: #D6D6D6;
+    }
+
+    .top-left-logo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 100px;
+      z-index: 99999999;
+    }
+
+    .container {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      z-index: 1;
+      overflow: hidden;
+      transition: background-color 1s ease;
+    }
+
+    .bg-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      transition: opacity 1s ease;
+    }
+
+    .bullseye-mask {
+      position: absolute;
+      width: 350vmin;
+      height: 350vmin;
+      background-color: white;
+      -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 30%, black 30.1%);
+      mask-image: radial-gradient(circle at center, transparent 0%, transparent 30%, black 30.1%);
+      z-index: 1;
+      transition: transform 2s ease, opacity 1s ease;
+      transform-origin: center;
+      opacity: 1;
+    }
+
+    .bullseye-mask.zoom-out {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+
+    .first-circle {
+      width: 90vmin;
+      height: 90vmin;
+      border-radius: 50%;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      z-index: 3;
+      transition: transform 1s ease, box-shadow 0.5s ease, background-color 1s ease;
+      transform-origin: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .first-circle.zoom-out {
+      transform: translate(-50%, -50%) scale(2.5);
+      background-color: #D6D6D6;
+      box-shadow: none;
+    }
+
+    .circle-content {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .text {
+      font-size: 5rem;
+      font-weight: 800;
+      font-family: "Open Sans";
+      line-height: 1.1;
+      position: absolute;
+      white-space: nowrap;
+    }
+
+    .text:first-child {
+      top: 35%;
+      left: 3%;
+      color: #D20809;
+    }
+
+    .text:last-child {
+      bottom: 35%;
+      left: 55%;
+      color: #1877F2;
+      z-index: -9;
+    }
+
+    .zoom-out .text:first-child {
+      top: 40%;
+      left: 8%;
+      color: #D20809;
+      font-size: 4vw;
+      z-index: 99;
+    }
+
+    .zoom-out .text:last-child {
+      bottom: 35%;
+      left: 50%;
+      color: #1877F2;
+      z-index: -9;
+    }
+
+    .center-image {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      transition: width 1s ease;
+    }
+
+    .center-image.fade-out {
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .text.scroll-to-top {
+      transform: translateY(-100%);
+      transition: transform 1s ease;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    .first-circle.zoom-out .center-image {
+      width: 55%;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      padding: 10px 20px;
+      justify-content: flex-end;
+      align-items: center;
+      z-index: 9999999999;
+      gap: 1vw;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .navbar.visible {
+      display: flex;
+      opacity: 1;
+    }
+
+    .dropdown {
+      padding: 5px 10px;
+      font-size: 1vw;
+      font-weight: 600;
+      border: 1px solid #A1A1A1;
+      border-radius: 1vw;
+      background-color: transparent;
+      color: #E91F20;
+    }
+
+    .social-icons {
+      border: 1px solid #A1A1A1;
+      border-radius: 1.5vw;
+    }
+
+    .social-icons i {
+      font-size: 20px;
+      margin: .2vw;
+      padding: 8px;
+      border: 1px solid #A1A1A1;
+      border-radius: 50%;
+      background-color: #FFFFFF;
+      color: #343455;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .social-icons i:hover {
+      transform: scale(1.1);
+    }
+
+    .valve-letter {
+      position: relative;
+      display: inline-block;
+    }
+
+    .valve-letter::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 80%;
+      width: 1vw;
+      height: 0vh;
+      background-color: #1877F2;
+      transition: height 1s ease;
+    }
+
+    .valve-letter.draw-line::after {
+      height: 100vh;
+    }
+
+    .text.center-valve-text {
+      top: 50%;
+      left: 60% !important;
+      bottom: auto;
+      transform: translate(-50%, -50%);
+      font-size: 4vw;
+      z-index: 100;
+      transition: all 1s ease;
+    }
+
+    /* ------------------------------ Total Slide    ------------------------- */
+
+    .rapslide {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      z-index: 99;
+    }
+
+
+    /* ------------------------------- Second Slide ---------------------------------------- */
+
+    .second-slide {
+      width: 100vw;
+      min-height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: relative;
+      z-index: 999999;
+    }
+
+    .second-slide.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .second-slide .content {
+      max-width: 800px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .center-heading {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .slide-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 5vh 5vw;
+      max-width: 1400px;
+      width: 100%;
+    }
+
+    .left-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3vh;
+      justify-content: center;
+      align-items: flex-start;
+      width: 50%;
+      height: auto;
+    }
+
+    .left-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex: 1;
+      gap: 4vh;
+      position: relative;
+    }
+
+    .with-arrows {
+      position: relative;
+    }
+
+    .arrow-target1 {
+      position: relative;
+    }
+
+    .arrow-target1::before {
+      content: '';
+      position: absolute;
+      right: -2.5vw;
+      top: 50%;
+      width: 2vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target1::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target2 {
+      position: relative;
+    }
+
+    .arrow-target2::before {
+      content: '';
+      position: absolute;
+      right: -4.3vw;
+      top: 50%;
+      width: 4vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target2::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target3 {
+      position: relative;
+    }
+
+    .arrow-target3::before {
+      content: '';
+      position: absolute;
+      right: -8vw;
+      top: 50%;
+      width: 7.5vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target3::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target4 {
+      position: relative;
+    }
+
+    .arrow-target4::before {
+      content: '';
+      position: absolute;
+      right: -8.7vw;
+      top: 50%;
+      width: 8.2vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target4::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .spec-box1 {
+      background-color: #1877F2;
+      color: #FFFFFF;
+      font-size: 1.1vw;
+      padding: 1vw;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+      width: fit-content;
+      text-align: center;
+    }
+
+
+    .spec-box {
+      background: white;
+      color: black;
+      font-size: 1.1vw;
+      padding: 1vw;
+      border-radius: 0.5vw;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .valve-image {
+      width: 100%;
+      max-width: 350px;
+      background-color: #FFFFFF;
+    }
+
+    .product-description {
+      font-size: 1vw;
+      color: white;
+      line-height: 1.6;
+      text-align: left;
+      background-color: #1161C9;
+      max-width: 350px;
+      padding: .5vw;
+    }
+
+
+    .page-indicator {
+      position: fixed;
+      bottom: 2vh;
+      right: 2vw;
+      font-size: 1vw;
+      color: #D20809;
+      font-weight: 600;
+      background-color: transparent;
+      padding: 0.5vw 2vw;
+      border-radius: 0.5vw;
+      z-index: 999999;
+      border: 1px solid #898989;
+    }
+
+
+    .arrow-stack {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 3vh;
+      align-items: flex-end;
+    }
+
+    .arrow-stack::before {
+      content: '';
+      position: absolute;
+      bottom: 1.8vw;
+      right: -1.3vw;
+      width: 2px;
+      height: 38vh;
+      background-color: #1877F2;
+      z-index: 0;
+    }
+
+    .spec-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      /* To keep right alignment */
+    }
+
+    .black-bg {
+      background-color: #000000;
+    }
+
+
+
+    /* --------------------------- THIRD SLIDE  ------------------------------- */
+
+
+
+    .second-slide1 {
+      width: 100vw;
+      min-height: 100vh;
+      padding: 10vh 5vw;
+      background-color: #D6D6D6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 1s ease, transform 1s ease;
+      position: relative;
+      z-index: 999999;
+    }
+
+    .second-slide1.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .second-slide1 .content {
+      max-width: 800px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .center-heading1 {
+      font-size: 20vw;
+      color: transparent;
+      -webkit-text-stroke: 2px #FFFFFF;
+      text-stroke: 2px #FFFFFF;
+      position: absolute;
+      z-index: -1;
+      font-family: "Open Sans";
+      font-weight: 800;
+    }
+
+    .vertical-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2.5vw;
+      height: 0;
+      background-color: #1877F2;
+      z-index: 1;
+      transition: height 1.5s ease, opacity 1s ease;
+      opacity: 0;
+    }
+
+    .vertical-line.active {
+      height: 100vh;
+      opacity: 1;
+    }
+
+    .slide-content1 {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 5vh 5vw;
+      max-width: 1400px;
+      width: 100%;
+    }
+
+    .left-column1 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3vh;
+      justify-content: center;
+      align-items: flex-start;
+      width: 50%;
+      height: auto;
+    }
+
+    .left-group1 {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      flex: 1;
+      gap: 4vh;
+      position: relative;
+    }
+
+    .with-arrows1 {
+      position: relative;
+    }
+
+    .arrow-target11 {
+      position: relative;
+    }
+
+    .arrow-target11::before {
+      content: '';
+      position: absolute;
+      right: -2.5vw;
+      top: 50%;
+      width: 2vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target11::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target21 {
+      position: relative;
+    }
+
+    .arrow-target21::before {
+      content: '';
+      position: absolute;
+      right: -4.3vw;
+      top: 50%;
+      width: 4vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target21::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target31 {
+      position: relative;
+    }
+
+    .arrow-target31::before {
+      content: '';
+      position: absolute;
+      right: -8vw;
+      top: 50%;
+      width: 7.5vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target31::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .arrow-target41 {
+      position: relative;
+    }
+
+    .arrow-target41::before {
+      content: '';
+      position: absolute;
+      right: -8.7vw;
+      top: 50%;
+      width: 8.2vw;
+      height: 2px;
+      background-color: #1877F2;
+      transform: translateY(-50%);
+    }
+
+    .arrow-target41::after {
+      content: '';
+      position: absolute;
+      right: -0.8vw;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+      width: 6px;
+      height: 6px;
+      border-left: 2px solid #1877F2;
+      border-top: 2px solid #1877F2;
+    }
+
+    .spec-box11 {
+      background-color: #1877F2;
+      color: #FFFFFF;
+      font-size: 1.1vw;
+      padding: 1vw;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+      width: fit-content;
+      text-align: center;
+    }
+
+
+    .spec-box2 {
+      background: white;
+      color: black;
+      font-size: 1.1vw;
+      padding: 1vw;
+      border-radius: 0.5vw;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+      max-width: 300px;
+    }
+
+    .right-column1 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 2.5vw;
+    }
+
+    .valve-image1 {
+      width: 100%;
+      max-width: 350px;
+      background-color: #FFFFFF;
+    }
+
+    .product-description1 {
+      font-size: 1vw;
+      color: white;
+      line-height: 1.6;
+      text-align: left;
+      background-color: #1161C9;
+      max-width: 350px;
+      padding: .5vw;
+    }
+
+
+    .page-indicator {
+      position: fixed;
+      bottom: 2vh;
+      right: 2vw;
+      font-size: 1vw;
+      color: #D20809;
+      font-weight: 600;
+      background-color: transparent;
+      padding: 0.5vw 2vw;
+      border-radius: 0.5vw;
+      z-index: 999999;
+      border: 1px solid #898989;
+    }
+
+
+    .arrow-stack1 {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 3vh;
+      align-items: flex-end;
+    }
+
+    .arrow-stack1::before {
+      content: '';
+      position: absolute;
+      bottom: 1.8vw;
+      right: -1.3vw;
+      width: 2px;
+      height: 38vh;
+      background-color: #1877F2;
+      z-index: 0;
+    }
+
+    .spec-header-row1 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      /* To keep right alignment */
+    }
+
+    .black-bg1 {
+      background-color: #000000;
+    }
+
+
+    .page-section {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+
+    /* --------------------------  Media Query----------------------------- */
+
+    @media (max-width: 1700px) {
+      .text {
+        font-size: 4rem;
+      }
+
+      .zoom-out .text:first-child {
+        left: 3%;
+      }
+    }
+
+    @media (max-width: 1300px) {
+      .text {
+        font-size: 3rem;
+      }
+
+      .zoom-out .text:first-child {
+        left: 3%;
+      }
+    }
+  </style>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300..800&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+
+  <div class="container" id="container">
+    <img src="./images/homebg.webp" alt="BannerImage" class="bg-video" id="bgVideo" />
+    <img src="./images/rapengineeringlogo.png" alt="rapengineeringlogo" class="top-left-logo" />
+
+    <nav class="navbar" id="navbar">
+      <select class="dropdown">
+        <option selected disabled>Home</option>
+        <option>About</option>
+        <option>Explainer</option>
+        <option>Valveco DTD</option>
+        <option>DTD</option>
+        <option>SDTD</option>
+        <option>SDTD-C</option>
+        <option>Y-Valve</option>
+        <option>BDV</option>
+        <option>DTD Parts</option>
+        <option>Different Installation</option>
+        <option>Selling points</option>
+      </select>
+      <div class="social-icons">
+        <i class="fab fa-linkedin"></i>
+        <i class="fab fa-facebook"></i>
+        <i class="fab fa-youtube"></i>
+        <i class="fa-brands fa-square-x-twitter"></i>
+      </div>
+    </nav>
+
+    <div class="bullseye-mask" id="bullseyeMask"></div>
+
+    <div class="first-circle" id="circle">
+      <div class="circle-content">
+        <div class="text">DIVERTER</div>
+        <img src="./images/DTDnew.png" class="center-image" alt="DTD" />
+        <div class="text">
+          <span class="valve-letter">V</span>ALVE
+        </div>
+      </div>
+    </div>
+
+    <section class="second-slide page-section" id="secondSlide">
+      <div class="center-heading">INFO</div>
+      <div class="slide-content">
+        <div class="left-group">
+          <div class="spec-header-row">
+            <div class="spec-box1 with-arrows black-bg">PRODUCT</div>
+            <div class="spec-box1 with-arrows">APPLICATION</div>
+          </div>
+          <div class="left-column">
+            <div class="arrow-stack">
+              <div class="spec-box arrow-target1" style="right: 10%;">Diverging</div>
+              <div class="spec-box arrow-target2" style="right: 25%;">Converging</div>
+              <div class="spec-box arrow-target3" style="right: 55%;">Pressure conveying</div>
+              <div class="spec-box arrow-target4" style="right: 60%;">Vacuum conveying</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+          <img src="./images/DTDnew.png" alt="Valve Image" class="valve-image" />
+          <div class="product-description">
+            Diverter Valves direct material from one source to multiple destinations and make sure that conveying air
+            and product are forwarded with low resistance.
+          </div>
+        </div>
+      </div>
+      <div class="vertical-line" id="verticalLine"></div>
+      <div class="page-indicator" id="pageIndicator">1 / 11</div>
+    </section>
+
+    <section class="second-slide1 page-section" id="secondSlide1">
+      <div class="center-heading1">INFO</div>
+      <div class="slide-content1">
+        <div class="left-group1">
+          <div class="spec-header-row1">
+            <div class="spec-box11 with-arrows1 black-bg1">PRODUCT</div>
+            <div class="spec-box11 with-arrows1">APPLICATION</div>
+          </div>
+          <div class="left-column1">
+            <div class="arrow-stack1">
+              <div class="spec-box2 arrow-target11" style="right: 10%;">Diverging</div>
+              <div class="spec-box2 arrow-target21" style="right: 25%;">Converging</div>
+              <div class="spec-box2 arrow-target31" style="right: 55%;">Pressure conveying</div>
+              <div class="spec-box2 arrow-target41" style="right: 60%;">Vacuum conveying</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column1">
+          <img src="./images/DTDnew.png" alt="Valve Image" class="valve-image1" />
+          <div class="product-description1">
+            Diverter Valves direct material from one source to multiple destinations and make sure that conveying air
+            and product are forwarded with low resistance.
+          </div>
+        </div>
+      </div>
+      <div class="vertical-line" id="verticalLine"></div>
+      <div class="page-indicator" id="pageIndicator">1 / 11</div>
+    </section>
+
+  </div>
+
+
+  <script>
+    // Banner section 
+  
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+  
+    // Element References for both slides
+    const circle = document.getElementById('circle');
+    const bgVideo = document.getElementById('bgVideo');
+    const bullseyeMask = document.getElementById('bullseyeMask');
+    const body = document.body;
+    const navbar = document.getElementById('navbar');
+    const centerImage = document.querySelector('.center-image');
+    const textTop = document.querySelector('.text:first-child');
+    const textBottom = document.querySelector('.text:last-child');
+    const valveLetter = document.querySelector('.valve-letter');
+    const secondSlide = document.getElementById('secondSlide'); // First slide ID (unchanged)
+    const secondSlide1 = document.getElementById('secondSlide1'); // Second slide ID
+    const verticalLine = document.getElementById('verticalLine');
+  
+    let hasZoomedOut = false;
+  
+    // Scroll Event to trigger animations and actions
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+  
+      if (scrollY > 250 && !hasZoomedOut) {
+        hasZoomedOut = true;
+  
+        // Zoom out effects for UI elements
+        circle.classList.add('zoom-out');
+        bullseyeMask.classList.add('zoom-out');
+        bgVideo.style.opacity = 0;
+        body.classList.add('gray-bg');
+  
+        // Step 1: UI elements animation (1s delay)
+        setTimeout(() => {
+          navbar.style.display = 'flex';
+          navbar.classList.add('visible');
+          centerImage.classList.add('fade-out');
+          textTop.classList.add('scroll-to-top');
+          textBottom.classList.add('scroll-to-top');
+          valveLetter.classList.add('draw-line');
+          textBottom.classList.add('center-valve-text');
+        }, 1000);
+  
+        // Step 2: Show second slide AFTER all animations (2s delay)
+        setTimeout(() => {
+          // Center the second slide in the viewport
+          secondSlide.classList.add('visible');
+          secondSlide.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll secondSlide into view
+        }, 2000);
+  
+        // Show second-slide1 after secondSlide is fully centered (delay)
+        setTimeout(() => {
+          secondSlide1.classList.add('visible');
+          secondSlide1.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll secondSlide1 into view after it appears
+        }, 2500);
+      }
+  
+      // Reset animations when scrolling back to the top
+      if (scrollY <= 250 && hasZoomedOut) {
+        hasZoomedOut = false;
+  
+        circle.classList.remove('zoom-out');
+        bullseyeMask.classList.remove('zoom-out');
+        bgVideo.style.opacity = 1;
+        body.classList.remove('gray-bg');
+        navbar.classList.remove('visible');
+  
+        setTimeout(() => {
+          navbar.style.display = 'none';
+        }, 500);
+  
+        centerImage.classList.remove('fade-out');
+        textTop.classList.remove('scroll-to-top');
+        textBottom.classList.remove('scroll-to-top');
+        valveLetter.classList.remove('draw-line');
+        textBottom.classList.remove('center-valve-text');
+  
+        secondSlide.classList.remove('visible');
+        secondSlide1.classList.remove('visible'); // Reset the visibility of secondSlide1
+        verticalLine.classList.remove('active');
+      }
+    });
+  
+    // Pagination: Update page number on scroll
+    const pageIndicator = document.getElementById('pageIndicator');
+    const sections = document.querySelectorAll('.page-section');
+    const totalPages = sections.length;
+  
+    function updatePageIndicator() {
+      let currentPage = 1;
+  
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        // Determine the current section based on scroll position
+        if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+          currentPage = index + 1;
+        }
+      });
+  
+      pageIndicator.textContent = `${currentPage} / ${totalPages}`;
+    }
+  
+    // Listen to scroll and load events to update page indicator
+    window.addEventListener('scroll', updatePageIndicator);
+    window.addEventListener('load', updatePageIndicator);
+  
+    // Slide 1 animation (If there is any animation for Slide 1, it should go here)
+    // Slide 3 animation (If there is any animation for Slide 3, it should go here)
+  
+  </script>
+  
+
+
+</body>
+
+</html>
